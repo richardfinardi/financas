@@ -481,7 +481,7 @@ executarGenerico: async function(funcaoBackend, argumentos = null) {
       modalConfirmBS.show();
     }
 
-    window.addEventListener('load', function() { 
+window.addEventListener('load', function() { 
       modalBS = new bootstrap.Modal(document.getElementById('modalDetalhes'));
       modalConfirmBS = new bootstrap.Modal(document.getElementById('modalConfirmacao'));
       toastBS = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 4000 });
@@ -489,6 +489,11 @@ executarGenerico: async function(funcaoBackend, argumentos = null) {
       var d = new Date();
       var mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       document.getElementById('dashFiltroMes').value = mStr;
+
+      // 🔥 LINHA ADICIONADA: Preenche o campo 'Data' do lançamento com o dia de hoje automaticamente
+      var hojeStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      document.getElementById('lData').value = hojeStr;
+
       recarregarDadosGlobais(); 
     });
 
@@ -823,9 +828,14 @@ executarGenerico: async function(funcaoBackend, argumentos = null) {
       document.getElementById('formLancamentoTitulo').innerText = recorrenciaId ? "✏️ Editando Conta Recorrente" : "✏️ Editando Lançamento Normal"; document.getElementById('btnLancamento').innerText = "Atualizar"; document.getElementById('btnCancelarEdicao').classList.remove('d-none'); 
     }
 
-    function cancelarEdicao() { 
+function cancelarEdicao() { 
       document.getElementById('editLancamentoId').value = ""; document.getElementById('editLancamentoRecorrenciaId').value = ""; document.getElementById('editLancamentoDataOriginal').value = "";
-      document.getElementById('formLancamento').reset(); document.getElementById('formLancamentoTitulo').innerText = "📑 Novo Lançamento Manual"; document.getElementById('btnLancamento').innerText = "Gravar"; document.getElementById('btnCancelarEdicao').classList.add('d-none'); 
+      document.getElementById('formLancamento').reset(); 
+      
+      var d = new Date();
+      document.getElementById('lData').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+      document.getElementById('formLancamentoTitulo').innerText = "📑 Novo Lançamento Manual"; document.getElementById('btnLancamento').innerText = "Gravar"; document.getElementById('btnCancelarEdicao').classList.add('d-none'); 
     }
     
     function processarLancamentoForm(e) {
