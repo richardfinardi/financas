@@ -59,7 +59,7 @@
 
   <nav class="navbar navbar-dark p-2">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <span class="navbar-brand mb-0 h6">fUXO DE CAIXA V4.2</span>
+      <span class="navbar-brand mb-0 h6">fUXO DE CAIXA V4.3</span>
       <span class="badge bg-success" style="font-size: 11px;" id="status-conexao">🟢 Conectado</span>
     </div>
   </nav>
@@ -238,15 +238,12 @@
         <div class="card text-center py-4"><button class="btn btn-primary" id="btnSincronizar" onclick="sincronizarAgendaReal()">🔄 Sincronizar Google Calendar</button><div id="msgAgenda" class="mt-2 small fw-bold"></div></div>
       </div>
 
-<!-- ==================== TAB CLIENTES (BLOCO ATUALIZADO) ==================== -->
+      <!-- TAB CLIENTES -->
       <div class="tab-pane fade" id="clientes" role="tabpanel">
         <div class="row">
           <div class="col-md-5">
             <div class="card" id="cardFormCliente">
               <h6 class="fw-bold mb-3" id="formClienteTitulo">🤝 Gerenciar Cliente</h6>
-              
-              <!-- 1. O FORMULÁRIO COM O CHECKBOX -->
-              <!-- FORMULÁRIO COMPLETO COM O ENVIO CORRIGIDO -->
               <form id="formRegra" onsubmit="enviarDadosClienteNovos(event)">
                 <input type="hidden" id="editClienteId" value="">
                 <div class="mb-2"><label class="form-label small">Nome</label><input type="text" id="regraCliente" class="form-control form-control-sm" required></div>
@@ -271,16 +268,12 @@
                   <button type="button" class="btn btn-sm btn-secondary d-none" id="btnCancelarClienteEdicao" onclick="cancelarClienteEdicao()">X</button>
                 </div>
               </form>
-
             </div>
           </div>
           <div class="col-md-7"><div class="card"><h6>Clientes Cadastrados</h6><div class="table-container"><table class="table table-sm align-middle"><tbody id="tbodyRegras"></tbody></table></div></div></div>
         </div>
       </div>
 
-      <!-- SCRIPT CORRIGIDO QUE CONECTA COM O BANCO -->
-      
-      <!-- SCRIPT CORRIGIDO DEFINITIVO -->
       <script>
         function enviarDadosClienteNovos(event) {
           event.preventDefault();
@@ -303,7 +296,6 @@
             porHora: porHora
           };
 
-          // Define qual função do Apps Script vai rodar no servidor (.gs)
           const funcaoPlanilha = id ? "atualizarClienteBackend" : "salvarRegra";
 
           function finalizarSucesso(resposta) {
@@ -315,7 +307,6 @@
             if (typeof listarRegras === "function") listarRegras();
           }
 
-          // Executa direto na biblioteca fake sem encadear métodos que dão erro
           if (typeof google !== "undefined" && google.script && google.script.run) {
             google.script.run.withSuccessHandler(finalizarSucesso)[funcaoPlanilha](dados);
           } else if (typeof executarNoBackend === "function") {
@@ -326,7 +317,6 @@
           }
         }
       </script>
-      <!-- ==================== FIM DO BLOCO ==================== -->
 
       <!-- TAB LANÇAMENTOS -->
       <div class="tab-pane fade" id="lancamentos" role="tabpanel">
@@ -455,12 +445,11 @@
             this.successHandler = handler;
             return this;
           },
-executarGenerico: async function(funcaoBackend, argumentos = null) {
+          executarGenerico: async function(funcaoBackend, argumentos = null) {
             try {
               document.getElementById('status-conexao').innerText = "🔄 Sincronizando...";
               document.getElementById('status-conexao').className = "badge bg-warning";
               
-              // Enviamos como URLSearchParams para o Google aceitar sem travar o processamento interno
               const corpoRequisicao = new URLSearchParams();
               corpoRequisicao.append('contents', JSON.stringify({ funcao: funcaoBackend, args: argumentos }));
 
@@ -528,7 +517,7 @@ executarGenerico: async function(funcaoBackend, argumentos = null) {
     function exibirAvisoNaTela(mensagem, tipo = 'success') {
       var toastElement = document.getElementById('liveToast');
       var toastMensagem = document.getElementById('toastMensagem');
-      toastMensagem.innerText = message = mensagem;
+      toastMensagem.innerText = mensagem;
       
       toastElement.className = "toast align-items-center border-0 bg-" + (tipo === 'success' ? 'success' : 'danger');
       toastBS.show();
@@ -548,7 +537,7 @@ executarGenerico: async function(funcaoBackend, argumentos = null) {
       modalConfirmBS.show();
     }
 
-window.addEventListener('load', function() { 
+    window.addEventListener('load', function() { 
       modalBS = new bootstrap.Modal(document.getElementById('modalDetalhes'));
       modalConfirmBS = new bootstrap.Modal(document.getElementById('modalConfirmacao'));
       toastBS = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 4000 });
@@ -557,7 +546,6 @@ window.addEventListener('load', function() {
       var mStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       document.getElementById('dashFiltroMes').value = mStr;
 
-      // 🔥 LINHA ADICIONADA: Preenche o campo 'Data' do lançamento com o dia de hoje automaticamente
       var hojeStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       document.getElementById('lData').value = hojeStr;
 
@@ -586,7 +574,7 @@ window.addEventListener('load', function() {
         .obterDadosIniciais();
     }
 
-    function executarSimulacaoEmTela() {
+    function ejecutarSimulacaoEmTela() {
       var inputs = document.querySelectorAll('.input-simular-data');
       var houveMudanca = false;
       if (!lancamentosSimulados) { lancamentosSimulados = JSON.parse(JSON.stringify(state.lancamentos)); }
@@ -818,7 +806,7 @@ window.addEventListener('load', function() {
         });
         return; 
       }
-      var escolha = prompt("Esta conta faz parte de uma RECORRÊNCIA.\nDigite a opção desejada:\n\n1 - Excluir APENAS esta parcela\n2 - Excluir ESTA e as parcelas FUTURAS");
+      var escolha = prompt("Esta conta faz parte de uma RECORRÊNCIA.\nDigite a opção desejada:\n\n1 - Excluir APENAS esta parcela\n2 - Excluir ESTA e las parcelas FUTURAS");
       if (escolha === "1") {
         google.script.run.withSuccessHandler(function(){ exibirAvisoNaTela("Parcela única excluída!", "success"); recarregarDadosGlobais(); }).excluirLancamentoAvancado(linhaId, "unico", "", "");
       } else if (escolha === "2") {
@@ -895,7 +883,7 @@ window.addEventListener('load', function() {
       document.getElementById('formLancamentoTitulo').innerText = recorrenciaId ? "✏️ Editando Conta Recorrente" : "✏️ Editando Lançamento Normal"; document.getElementById('btnLancamento').innerText = "Atualizar"; document.getElementById('btnCancelarEdicao').classList.remove('d-none'); 
     }
 
-function cancelarEdicao() { 
+    function cancelarEdicao() { 
       document.getElementById('editLancamentoId').value = ""; document.getElementById('editLancamentoRecorrenciaId').value = ""; document.getElementById('editLancamentoDataOriginal').value = "";
       document.getElementById('formLancamento').reset(); 
       
@@ -961,7 +949,7 @@ function cancelarEdicao() {
       var seisMesesPraFrente = new Date(dHoje.getTime() + (180 * 24 * 60 * 60 * 1000));
       if (dataLimiteFuturaTabela.getTime() < seisMesesPraFrente.getTime()) { dataLimiteFuturaTabela = new Date(seisMesesPraFrente.getFullYear(), seisMesesPraFrente.getMonth(), seisMesesPraFrente.getDate(), 12, 0, 0); }
 
-      var htmlTabelaDiaria = ""; var dadosEixoX = []; var dadosEixoY = []; var saldoAcumuladoLinha = 0;
+      var htmlTabelaDiaria = ""; var dadosEixoX = []; var dadosEixoY = []; var mapeamentoDatasGrafico = []; var saldoAcumuladoLinha = 0;
       var stringDataInicialIso = `${dataPonteiroInicial.getFullYear()}-${String(dataPonteiroInicial.getMonth() + 1).padStart(2, '0')}-${String(dataPonteiroInicial.getDate()).padStart(2, '0')}`;
       todasDatasDisponiveis.forEach(function(dStr) { if (dStr < stringDataInicialIso) { saldoAcumuladoLinha += (mapaDatas[dStr].receita - mapaDatas[dStr].despesa); } });
 
@@ -972,7 +960,12 @@ function cancelarEdicao() {
         var despDoDia = mapaDatas[dataLoopStr] ? mapaDatas[dataLoopStr].despesa : 0;
         saldoAcumuladoLinha += (recDoDia - despDoDia);
         var dataFormatadaBR = `${String(ponteiroData.getDate()).padStart(2, '0')}/${String(ponteiroData.getMonth() + 1).padStart(2, '0')}`;
-        if (ponteiroData.getTime() <= dataLimiteFuturaGrafico.getTime()) { dadosEixoX.push(dataFormatadaBR + "/" + ponteiroData.getFullYear()); dadosEixoY.push(saldoAcumuladoLinha); }
+        
+        if (ponteiroData.getTime() <= dataLimiteFuturaGrafico.getTime()) { 
+          dadosEixoX.push(dataFormatadaBR + "/" + ponteiroData.getFullYear()); 
+          dadosEixoY.push(saldoAcumuladoLinha); 
+          mapeamentoDatasGrafico.push(dataLoopStr); // Guarda a data ISO equivalente para usar no clique do gráfico
+        }
         
         var tdReceita = recDoDia > 0 ? `<button type="button" class="btn-detalhe text-success" onclick="verDetalhesDoDia('${dataLoopStr}', 'Receita')">+R$${recDoDia.toFixed(0)}</button>` : `<span class="text-muted">-</span>`;
         var tdDespesa = despDoDia > 0 ? `<button type="button" class="btn-detalhe text-danger" onclick="verDetalhesDoDia('${dataLoopStr}', 'Despesa')">-R$${despDoDia.toFixed(0)}</button>` : `<span class="text-muted">-</span>`;
@@ -999,7 +992,31 @@ function cancelarEdicao() {
       chartInstance = new Chart(ctx, {
         type: 'line',
         data: { labels: dadosEixoX, datasets: [{ label: 'Saldo', data: dadosEixoY, borderColor: '#1abc9c', backgroundColor: 'rgba(26, 188, 156, 0.05)', borderWidth: 2, fill: true, tension: 0.1 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 9 }, maxRotation: 45 } } } }
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { legend: { display: false } }, 
+          scales: { y: { ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 9 }, maxRotation: 45 } } },
+          // 🚀 CONFIGURAÇÃO DO CLIQUE INTERATIVO NO PONTO DO GRÁFICO 🚀
+          onClick: function(evt, activeElements) {
+            if (activeElements && activeElements.length > 0) {
+              var index = activeElements[0].index;
+              var dataIsoClicada = mapeamentoDatasGrafico[index];
+              
+              // Verifica se o dia clicado tem mais receita ou despesa para abrir o modal correto
+              var dadosDia = mapaDatas[dataIsoClicada] || { receita: 0, despesa: 0 };
+              
+              if (dadosDia.receita > 0) {
+                verDetalhesDoDia(dataIsoClicada, 'Receita');
+              } else if (dadosDia.despesa > 0) {
+                verDetalhesDoDia(dataIsoClicada, 'Despesa');
+              } else {
+                // Se for um dia zerado, força o modal de Despesa vazio informativo
+                verDetalhesDoDia(dataIsoClicada, 'Despesa');
+              }
+            }
+          }
+        }
       });
     }
   </script>
