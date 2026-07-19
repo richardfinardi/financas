@@ -388,29 +388,39 @@
             this.successHandler = handler;
             return this;
           },
-          executarGenerico: async function(funcaoBackend, argumentos = null) {
+executarGenerico: async function(funcaoBackend, argumentos = null) {
             try {
               document.getElementById('status-conexao').innerText = "🔄 Sincronizando...";
               document.getElementById('status-conexao').className = "badge bg-warning";
               
+              // Enviamos como URLSearchParams para o Google aceitar sem travar o processamento interno
+              const corpoRequisicao = new URLSearchParams();
+              corpoRequisicao.append('contents', JSON.stringify({ funcao: funcaoBackend, args: argumentos }));
+
               const resposta = await fetch(GOOGLE_API_URL, {
                 method: 'POST',
-                mode: 'cors', // Força o modo CORS
-                redirect: 'follow', // OBRIGATÓRIO para Google Apps Script
+                redirect: 'follow',
                 headers: {
-                  'Content-Type': 'text/plain;charset=utf-8' // Evita pré-requisição OPTIONS restrita pelo Google
+                  'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
                 },
                 body: JSON.stringify({ funcao: funcaoBackend, args: argumentos })
               });
               
               const resultado = await resposta.json();
               
+              if (resultado && resultado.erro) {
+                console.error("Erro retornado do Google:", resultado.erro);
+                document.getElementById('status-conexao').innerText = "🔴 Erro no Script";
+                document.getElementById('status-conexao').className = "badge bg-danger";
+                return;
+              }
+              
               document.getElementById('status-conexao').innerText = "🟢 Conectado";
               document.getElementById('status-conexao').className = "badge bg-success";
               
               if (this.successHandler) this.successHandler(resultado);
             } catch (err) {
-              console.error("Erro na requisição:", err);
+              console.error("Erro crítico na requisição:", err);
               document.getElementById('status-conexao').innerText = "🔴 Erro de Conexão";
               document.getElementById('status-conexao').className = "badge bg-danger";
             }
