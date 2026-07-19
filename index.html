@@ -238,13 +238,15 @@
         <div class="card text-center py-4"><button class="btn btn-primary" id="btnSincronizar" onclick="sincronizarAgendaReal()">🔄 Sincronizar Google Calendar</button><div id="msgAgenda" class="mt-2 small fw-bold"></div></div>
       </div>
 
-<!-- TAB CLIENTES -->
+<!-- ==================== TAB CLIENTES (BLOCO ATUALIZADO) ==================== -->
       <div class="tab-pane fade" id="clientes" role="tabpanel">
         <div class="row">
           <div class="col-md-5">
             <div class="card" id="cardFormCliente">
               <h6 class="fw-bold mb-3" id="formClienteTitulo">🤝 Gerenciar Cliente</h6>
-              <form id="formRegra" onsubmit="processarClienteForm(event)">
+              
+              <!-- 1. O FORMULÁRIO COM O CHECKBOX -->
+              <form id="formRegra" onsubmit="enviarDadosClienteNovos(event)">
                 <input type="hidden" id="editClienteId" value="">
                 <div class="mb-2"><label class="form-label small">Nome</label><input type="text" id="regraCliente" class="form-control form-control-sm" required></div>
                 <div class="mb-2"><label class="form-label small">Valor/Visita</label><input type="number" step="0.01" id="regraValor" class="form-control form-control-sm" required></div>
@@ -255,7 +257,7 @@
                   <div class="col-6"><label class="form-label text-xs">A partir de</label><input type="date" id="regraDataVigor" class="form-control form-control-sm"></div>
                 </div>
 
-                <!-- 🚀 NOVO: Checkbox de Cobrança por Hora -->
+                <!-- Checkbox de Cobrança por Hora -->
                 <div class="form-check mb-3">
                   <input class="form-check-input" type="checkbox" id="regraPorHora">
                   <label class="form-check-label small fw-bold text-secondary" for="regraPorHora" style="cursor: pointer;">
@@ -263,13 +265,67 @@
                   </label>
                 </div>
                 
-                <div class="d-flex gap-2"><button type="submit" class="btn btn-sm btn-success flex-grow-1" id="btnClienteSubmit">Salvar</button><button type="button" class="btn btn-sm btn-secondary d-none" id="btnCancelarClienteEdicao" onclick="cancelarClienteEdicao()">X</button></div>
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-sm btn-success flex-grow-1" id="btnClienteSubmit">Salvar</button>
+                  <button type="button" class="btn btn-sm btn-secondary d-none" id="btnCancelarClienteEdicao" onclick="cancelarClienteEdicao()">X</button>
+                </div>
               </form>
+
             </div>
           </div>
           <div class="col-md-7"><div class="card"><h6>Clientes Cadastrados</h6><div class="table-container"><table class="table table-sm align-middle"><tbody id="tbodyRegras"></tbody></table></div></div></div>
         </div>
       </div>
+
+      <!-- 2. SCRIPT EXCLUSIVO PARA O FUNCIONAMENTO DO BOTÃO SALVAR -->
+      <script>
+        function enviarDadosClienteNovos(event) {
+          event.preventDefault();
+
+          // Captura as informações da tela
+          const id = document.getElementById('editClienteId').value;
+          const cliente = document.getElementById('regraCliente').value;
+          const valorVisita = document.getElementById('regraValor').value;
+          const condicaoNome = document.getElementById('regraCondicaoNome').value;
+          const novoValor = document.getElementById('regraNovoValor').value;
+          const dataVigor = document.getElementById('regraDataVigor').value;
+          
+          // Captura se o checkbox está marcado (SIM) ou desmarcado (NÃO)
+          const porHora = document.getElementById('regraPorHora').checked ? "SIM" : "NÃO";
+
+          const dados = {
+            id: id,
+            cliente: cliente,
+            valorVisita: valorVisita,
+            condicaoNome: condicaoNome,
+            novoValor: novoValor,
+            dataVigor: dataVigor,
+            porHora: porHora
+          };
+
+          const acao = id ? "atualizarClienteBackend" : "salvarRegra";
+
+          // Tenta usar a sua função padrão de envio (comum em Apps Script/PWA)
+          // Se sua função global tiver outro nome (ex: chamarBackend, run), mude aqui:
+          const funcaoEnvio = typeof executarNoBackend === "function" ? executarNoBackend : google.script.run.withSuccessHandler;
+
+          funcaoEnvio(acao, dados).then(resposta => {
+            alert(resposta || "Processado com sucesso!");
+            
+            // Reseta os campos após salvar
+            document.getElementById('formRegra').reset();
+            document.getElementById('editClienteId').value = "";
+            document.getElementById('regraPorHora').checked = false;
+            
+            // Se tiver a função de atualizar a tabela na tela, executa ela
+            if (typeof carregarDados === "function") carregarDados();
+            if (typeof listarRegras === "function") listarRegras();
+          }).catch(erro => {
+            alert("Erro ao salvar: " + erro);
+          });
+        }
+      </script>
+      <!-- ==================== FIM DO BLOCO ==================== -->
 
       <!-- TAB LANÇAMENTOS -->
       <div class="tab-pane fade" id="lancamentos" role="tabpanel">
