@@ -59,7 +59,7 @@
 
   <nav class="navbar navbar-dark p-2">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <span class="navbar-brand mb-0 h6">fUXO DE CAIXA V4.4</span>
+      <span class="navbar-brand mb-0 h6">fUXO DE CAIXA V4.5</span>
       <span class="badge bg-success" style="font-size: 11px;" id="status-conexao">🟢 Conectado</span>
     </div>
   </nav>
@@ -346,7 +346,7 @@
                 <h6 class="fw-bold mb-0">Extrato Geral</h6>
               </div>
 
-              <!-- 🚀 BLOCO DE FILTROS ATUALIZADO COM SELETOR DE TIPO (RECEITA / DESPESA) -->
+              <!-- BLOCO DE FILTROS ATUALIZADO COM SELETOR DE TIPO (RECEITA / DESPESA) -->
               <div class="row g-2 p-2 bg-light rounded border mb-3">
                 <div class="col-sm-3">
                   <span class="filtro-label">🔍 Descrição / Termo</span>
@@ -432,7 +432,7 @@
           </div>
         </div>
         <div class="modal-footer bg-light py-2 d-flex justify-content-between">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-modal="modal">Fechar</button>
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>
           <div class="d-flex gap-2">
             <button type="button" class="btn btn-sm btn-warning font-weight-bold" onclick="executarSimulacaoEmTela()">📊 Simular Projeção</button>
           </div>
@@ -514,7 +514,7 @@
     var chartInstance = null; var modalBS = null; var modalConfirmBS = null; var toastBS = null;
     var exibirHistoricoCompleto = false; 
     var exibirHistoricoExtrato = false;
-    // 🚀 INCLUSÃO DA PROPRIEDADE TIPO NOS FILTROS ATIVOS[cite: 2]
+    // INCLUSÃO DA PROPRIEDADE TIPO NOS FILTROS ATIVOS
     var filtrosAtivos = { texto: "", categoria: "todas", tipo: "todos", inicio: "", fim: "" };
 
     function obterClasseStatusCaixa(valorSaldo) {
@@ -584,7 +584,8 @@
         .obterDadosIniciais();
     }
 
-    function ejecutarSimulacaoEmTela() {
+    // 🚀 CORREÇÃO DO NOME DA FUNÇÃO DE "ejecutar..." PARA "executar..."[cite: 1]
+    function executarSimulacaoEmTela() {
       var inputs = document.querySelectorAll('.input-simular-data');
       var houveMudanca = false;
       if (!lancamentosSimulados) { lancamentosSimulados = JSON.parse(JSON.stringify(state.lancamentos)); }
@@ -639,7 +640,7 @@
     function limparFiltrosExtrato() {
       document.getElementById('filtroTexto').value = "";
       document.getElementById('filtroCategoria').value = "todas";
-      // 🚀 LIMPA O SELETOR DE TIPO DO MENU[cite: 2]
+      // LIMPA O SELETOR DE TIPO DO MENU
       document.getElementById('filtroTipo').value = "todos";
       document.getElementById('filtroDataInicio').value = "";
       document.getElementById('filtroDataFim').value = "";
@@ -725,7 +726,7 @@
       if (deveFiltrar === true) {
         filtrosAtivos.texto = document.getElementById('filtroTexto').value.toLowerCase().trim();
         filtrosAtivos.categoria = document.getElementById('filtroCategoria').value;
-        // 🚀 CAPTURA O TIPO EXECUTADO NO FRONTEND PELO BOTÃO[cite: 2]
+        // CAPTURA O TIPO EXECUTADO NO FRONTEND PELO BOTÃO
         filtrosAtivos.tipo = document.getElementById('filtroTipo').value;
         filtrosAtivos.inicio = document.getElementById('filtroDataInicio').value;
         filtrosAtivos.fim = document.getElementById('filtroDataFim').value;
@@ -747,7 +748,7 @@
 
         if (filtrosAtivos.categoria !== "todas" && l.categoria !== filtrosAtivos.categoria) return;
         
-        // 🚀 REGRA DE VALIDAÇÃO DE FILTRAGEM POR TIPO (RECEITA / DESPESA)[cite: 2]
+        // REGRA DE VALIDAÇÃO DE FILTRAGEM POR TIPO (RECEITA / DESPESA)
         if (filtrosAtivos.tipo !== "todos" && l.tipo !== filtrosAtivos.tipo) return;
         
         if (filtrosAtivos.inicio !== "" && l.data < filtrosAtivos.inicio) return;
