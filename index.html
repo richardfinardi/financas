@@ -13,7 +13,421 @@
   
   <!-- Manifesto embutido otimizado para forçar o Standalone (Tela Cheia) -->
   <link rel="manifest" href="./manifest.json">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Financeiro</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .nav-tabs .nav-link { color: #495057; font-weight: 500; }
+    .nav-tabs .nav-link.active { font-weight: bold; }
+    .card-custom { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .badge-faturar { font-size: 0.9em; }
+  </style>
+</head>
+<body>
 
+<div class="container-fluid py-4">
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fa-solid fa-wallet text-primary"></i> Sistema Financeiro Integrado</h2>
+    <button class="btn btn-outline-secondary btn-sm" onclick="carregarDadosGerais()">
+      <i class="fa-solid fa-rotate"></i> Atualizar
+    </button>
+  </div>
+
+  <!-- Navegação de Abas -->
+  <ul class="nav nav-tabs mb-3" id="mainTabs" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link active" id="lancamentos-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-lancamentos" type="button">
+        <i class="fa-solid fa-list-check"></i> Extrato de Lançamentos
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="faturar-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-faturar" type="button">
+        <i class="fa-solid fa-file-invoice-dollar"></i> A Faturar
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" id="recorrencias-tab-btn" data-bs-toggle="tab" data-bs-target="#tab-recorrencias" type="button">
+        <i class="fa-solid fa-repeat"></i> Recorrências Config
+      </button>
+    </li>
+  </ul>
+
+  <!-- Conteúdo das Abas -->
+  <div class="tab-content" id="mainTabsContent">
+
+    <!-- ABA 1: LANÇAMENTOS -->
+    <div class="tab-pane fade show active" id="tab-lancamentos" role="tabpanel">
+      <div class="card card-custom p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5><i class="fa-solid fa-table-list"></i> Lançamentos Cadastrados</h5>
+          <button class="btn btn-success btn-sm" onclick="abrirModalNovoLancamento()">
+            <i class="fa-solid fa-plus"></i> Novo Lançamento
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle" id="tabelaLancamentos">
+            <thead class="table-light">
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Valor (R$)</th>
+                <th>Tipo</th>
+                <th>Categoria</th>
+                <th>Série / ID</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyLancamentos">
+              <tr><td colspan="7" class="text-center text-muted">Carregando lançamentos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 2: A FATURAR (COM BARRA DE PESQUISA POR CLIENTE) -->
+    <div class="tab-pane fade" id="tab-faturar" role="tabpanel">
+      <div class="card card-custom p-3 mb-3">
+        
+        <!-- BARRA DE FILTRO / PESQUISA POR CLIENTE -->
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-6">
+            <h5><i class="fa-solid fa-users"></i> Fila de Clientes a Faturar</h5>
+          </div>
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input 
+                type="text" 
+                id="filtroClienteFaturar" 
+                class="form-control" 
+                placeholder="Pesquisar por nome do cliente..." 
+                oninput="filtrarClientesFaturar()"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle" id="tabelaFaturar">
+            <thead class="table-light">
+              <tr>
+                <th>Cliente</th>
+                <th>Valor Previsto</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+                <th class="text-center">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyFaturar">
+              <tr><td colspan="5" class="text-center text-muted">Carregando itens a faturar...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA 3: RECORRÊNCIAS CONFIG -->
+    <div class="tab-pane fade" id="tab-recorrencias" role="tabpanel">
+      <div class="card card-custom p-3 mb-3">
+        <h5><i class="fa-solid fa-sliders"></i> Regras de Contas Recorrentes</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle" id="tabelaRecorrencias">
+            <thead class="table-light">
+              <tr>
+                <th>Série ID</th>
+                <th>Descrição</th>
+                <th>Valor Base</th>
+                <th>Tipo</th>
+                <th>Categoria</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyRecorrencias">
+              <tr><td colspan="5" class="text-center text-muted">Carregando configurações...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: EDICÃO / NOVO LANÇAMENTO -->
+<div class="modal fade" id="modalEditLancamento" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitulo">Editar Lançamento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formLancamento">
+          <input type="hidden" id="editRowId">
+          <input type="hidden" id="editRecorrenciaId">
+          <input type="hidden" id="editDataOriginalCorte">
+
+          <div class="mb-3">
+            <label class="form-label">Data</label>
+            <input type="date" class="form-control" id="editData" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <input type="text" class="form-control" id="editDescricao" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Valor (R$)</label>
+            <input type="number" step="0.01" class="form-control" id="editValor" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="editTipo">
+              <option value="Despesa">Despesa</option>
+              <option value="Receita">Receita</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Categoria</label>
+            <input type="text" class="form-control" id="editCategoria" required>
+          </div>
+
+          <!-- OPÇÕES DE APLICAÇÃO PARA RECORRÊNCIAS -->
+          <div id="boxOpcoesRecorrencia" class="alert alert-warning d-none">
+            <h6><i class="fa-solid fa-triangle-exclamation"></i> Este item faz parte de uma recorrência:</h6>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="radioModoEdicao" id="radioUnico" value="unico" checked>
+              <label class="form-check-label" for="radioUnico">Alterar apenas esta parcela</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="radioModoEdicao" id="radioPosteriores" value="posteriores">
+              <label class="form-check-label" for="radioPosteriores">Alterar esta e todas as parcelas futuras</label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="salvarLancamento()">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // CONFIGURAÇÃO DO WEBAPP DO GOOGLE APPS SCRIPT
+  // Substitua pela sua URL caso seja diferente
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw/exec";
+
+  let modalEditObj = null;
+  let dadosGlobais = { lancamentos: [], faturar: [], recorrencias: [] };
+
+  document.addEventListener("DOMContentLoaded", function() {
+    modalEditObj = new bootstrap.Modal(document.getElementById('modalEditLancamento'));
+    carregarDadosGerais();
+  });
+
+  // CHAMADA AJAX UNIVERSAL PARA O BACKEND DO GOOGLE APPS SCRIPT
+  function chamarBackend(nomeFuncao, argumentosArray, callback) {
+    fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ funcao: nomeFuncao, args: argumentosArray })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.erro) {
+        alert("Erro no Servidor: " + res.erro);
+      } else {
+        callback(res);
+      }
+    })
+    .catch(err => alert("Erro na requisição: " + err));
+  }
+
+  // CARREGAR DADOS DAS ABAS
+  function carregarDadosGerais() {
+    chamarBackend("obterDadosIniciais", [], function(res) {
+      if (!res) return;
+      dadosGlobais.lancamentos = res.lancamentos || [];
+      dadosGlobais.faturar = res.faturar || [];
+      dadosGlobais.recorrencias = res.recorrencias || [];
+
+      renderizarLancamentos();
+      renderizarFaturar();
+      renderizarRecorrencias();
+    });
+  }
+
+  // RENDERIZAR EXTARTO DE LANÇAMENTOS
+  function renderizarLancamentos() {
+    let tbody = document.getElementById("tbodyLancamentos");
+    tbody.innerHTML = "";
+
+    if (dadosGlobais.lancamentos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Nenhum lançamento encontrado.</td></tr>';
+      return;
+    }
+
+    dadosGlobais.lancamentos.forEach((item, index) => {
+      let dataFmt = item.data ? String(item.data).substring(0,10) : "";
+      let tr = document.createElement("tr");
+      
+      tr.innerHTML = `
+        <td>${dataFmt}</td>
+        <td><strong>${item.descricao}</strong></td>
+        <td>R$ ${Number(item.valor).toFixed(2)}</td>
+        <td><span class="badge bg-${item.tipo === 'Receita' ? 'success' : 'danger'}">${item.tipo}</span></td>
+        <td>${item.categoria}</td>
+        <td><small class="text-muted">${item.recorrenciaId || '-'}</small></td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-outline-primary" onclick="abrirEdicao(${index})">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // RENDERIZAR TABELA A FATURAR
+  function renderizarFaturar() {
+    let tbody = document.getElementById("tbodyFaturar");
+    tbody.innerHTML = "";
+
+    if (dadosGlobais.faturar.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhum cliente a faturar.</td></tr>';
+      return;
+    }
+
+    dadosGlobais.faturar.forEach((item) => {
+      let tr = document.createElement("tr");
+      tr.className = "linha-cliente-faturar"; // Classe usada para a filtragem rápida
+      
+      tr.innerHTML = `
+        <td class="nome-cliente"><strong>${item.cliente || item.nome}</strong></td>
+        <td>R$ ${Number(item.valor || 0).toFixed(2)}</td>
+        <td>${item.vencimento ? String(item.vencimento).substring(0,10) : '-'}</td>
+        <td><span class="badge bg-warning text-dark">Pendente</span></td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-success" onclick="faturarCliente('${item.cliente || item.nome}')">
+            <i class="fa-solid fa-check"></i> Faturar
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Re-aplica o filtro se houver algo digitado no input
+    filtrarClientesFaturar();
+  }
+
+  // LÓGICA DO FILTRO DE CLIENTES (A FATURAR)
+  function filtrarClientesFaturar() {
+    let termo = document.getElementById("filtroClienteFaturar").value.toLowerCase().trim();
+    let linhas = document.querySelectorAll("#tbodyFaturar tr.linha-cliente-faturar");
+
+    linhas.forEach(linha => {
+      let nomeCliente = linha.querySelector(".nome-cliente").innerText.toLowerCase();
+      if (nomeCliente.includes(termo)) {
+        linha.style.display = "";
+      } else {
+        linha.style.display = "none";
+      }
+    });
+  }
+
+  // RENDERIZAR RECORRÊNCIAS CONFIG
+  function renderizarRecorrencias() {
+    let tbody = document.getElementById("tbodyRecorrencias");
+    tbody.innerHTML = "";
+
+    if (dadosGlobais.recorrencias.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma regra cadastrada.</td></tr>';
+      return;
+    }
+
+    dadosGlobais.recorrencias.forEach((rec) => {
+      let tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><code>${rec.id}</code></td>
+        <td>${rec.descricao}</td>
+        <td>R$ ${Number(rec.valor).toFixed(2)}</td>
+        <td>${rec.tipo}</td>
+        <td>${rec.categoria}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ABRIR EDICÃO DE LANÇAMENTO
+  function abrirEdicao(index) {
+    let item = dadosGlobais.lancamentos[index];
+    
+    document.getElementById("editRowId").value = item.id; // Linha real da planilha
+    document.getElementById("editData").value = item.data ? String(item.data).substring(0,10) : "";
+    document.getElementById("editDataOriginalCorte").value = item.data ? String(item.data).substring(0,10) : "";
+    document.getElementById("editDescricao").value = item.descricao;
+    document.getElementById("editValor").value = item.valor;
+    document.getElementById("editTipo").value = item.tipo;
+    document.getElementById("editCategoria").value = item.categoria;
+    
+    let recId = item.recorrenciaId ? String(item.recorrenciaId).trim() : "";
+    document.getElementById("editRecorrenciaId").value = recId;
+
+    let box = document.getElementById("boxOpcoesRecorrencia");
+    if (recId !== "" && recId !== "null" && recId !== "undefined") {
+      box.classList.remove("d-none");
+    } else {
+      box.classList.add("d-none");
+    }
+
+    modalEditObj.show();
+  }
+
+  // SALVAR EDIÇÃO COM MODO DE RECORRÊNCIA
+  function salvarLancamento() {
+    let recId = document.getElementById("editRecorrenciaId").value;
+    let tipoEdicao = "unico";
+
+    if (recId !== "") {
+      let radioPosteriores = document.getElementById("radioPosteriores");
+      if (radioPosteriores && radioPosteriores.checked) {
+        tipoEdicao = "posteriores";
+      }
+    }
+
+    let payloadDados = {
+      id: document.getElementById("editRowId").value,
+      recorrenciaId: recId,
+      data: document.getElementById("editData").value,
+      dataOriginalCorte: document.getElementById("editDataOriginalCorte").value,
+      descricao: document.getElementById("editDescricao").value,
+      valor: document.getElementById("editValor").value,
+      tipo: document.getElementById("editTipo").value,
+      categoria: document.getElementById("editCategoria").value
+    };
+
+    // Manda os 2 argumentos dentro do Array esperado pelo Apps Script
+    chamarBackend("atualizarLancamentoAvancado", [payloadDados, tipoEdicao], function(res) {
+      alert("Lançamento atualizado com sucesso!");
+      modalEditObj.hide();
+      carregarDadosGerais();
+    });
+  }
+</script>
+</body>
+</html>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -57,7 +471,7 @@
 
   <nav class="navbar navbar-dark p-2">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V4.8</span>
+      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V4.9</span>
       <span class="badge bg-success" style="font-size: 11px;" id="status-conexao">🟢 Conectado</span>
     </div>
   </nav>
