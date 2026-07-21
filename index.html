@@ -57,7 +57,7 @@
 
   <nav class="navbar navbar-dark p-2">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <span class="navbar-brand mb-0 h6">fUXO DE CAIXA V4.7</span>
+      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V4.8</span>
       <span class="badge bg-success" style="font-size: 11px;" id="status-conexao">🟢 Conectado</span>
     </div>
   </nav>
@@ -438,10 +438,10 @@
   </div>
 
   <script>
-    // 🔗 INSIRA A URL DO SEU GOOGLE APPS SCRIPT AQUI DENTRO DAS ASPAS:
+    // 🔗 URL DO GOOGLE APPS SCRIPT
     const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbyPGpW6_YUbWEKYBvEPok8VISZxgCxBNqh2yTwqSM4MjjgpRycyuLusZ62PzDZVzZgHiw/exec";
 
-    // 🔄 PONTE DE COMUNICAÇÃO EXTERNA PARA SUBSTITUIR O GOOGLE.SCRIPT.RUN
+    // 🔄 PONTE DE COMUNICAÇÃO TOTALMENTE ADAPTADA PARA MÚLTIPLOS ARGUMENTOS NO BACKEND
     const google = {
       script: {
         run: {
@@ -455,7 +455,6 @@
               document.getElementById('status-conexao').innerText = "🔄 Sincronizando...";
               document.getElementById('status-conexao').className = "badge bg-warning";
               
-              // 🚀 SUPORTE MÚLTIPLOS ARGUMENTOS NO PAYLOAD DO GOOGLE APPS SCRIPT
               var payload = { funcao: funcaoBackend };
               if (argumentos !== null && typeof argumentos === 'object' && argumentos.argsArray) {
                 payload.args = argumentos.argsArray;
@@ -467,13 +466,19 @@
                 method: 'POST',
                 redirect: 'follow',
                 headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'
+                  'Content-Type': 'text/plain;charset=utf-8'
                 },
                 body: JSON.stringify(payload)
               });
               
-              const resultado = await resposta.json();
-              
+              const textoResposta = await resposta.text();
+              let resultado = null;
+              try {
+                resultado = JSON.parse(textoResposta);
+              } catch(e) {
+                resultado = textoResposta;
+              }
+
               if (resultado && resultado.erro) {
                 console.error("Erro retornado do Google:", resultado.erro);
                 document.getElementById('status-conexao').innerText = "🔴 Erro no Script";
@@ -497,8 +502,12 @@
           excluirLancamentoAvancado: function(id, tipo, recId, data) { this.executarGenerico('excluirLancamentoAvancado', {argsArray: [id, tipo, recId, data]}); },
           atualizarClienteBackend: function(dados) { this.executarGenerico('atualizarClienteBackend', dados); },
           salvarRegra: function(dados) { this.executarGenerico('salvarRegra', dados); },
-          // 🚀 ENVIAR AMBOS OS PARÂMETROS PARA O BACKEND DO APPS SCRIPT
-          atualizarLancamentoAvancado: function(dados, tipo) { this.executarGenerico('atualizarLancamentoAvancado', { argsArray: [dados, tipo] }); },
+          
+          // 🚀 ENVIAR OS DOIS PARÂMETROS EXATOS EM ARRAY PARA A FUNÇÃO BACKEND DO GOOGLE APPS SCRIPT
+          atualizarLancamentoAvancado: function(dados, tipo) { 
+            this.executarGenerico('atualizarLancamentoAvancado', { argsArray: [dados, tipo] }); 
+          },
+          
           atualizarLancamentoBackend: function(dados) { this.executarGenerico('atualizarLancamentoBackend', dados); },
           salvarLancamentoManual: function(dados) { this.executarGenerico('salvarLancamentoManual', dados); },
           salvarContasRecorrentesMaster: function(dados) { this.executarGenerico('salvarContasRecorrentesMaster', dados); },
@@ -915,7 +924,6 @@
       document.getElementById('btnLancamento').innerText = "Atualizar"; 
       document.getElementById('btnCancelarEdicao').classList.remove('d-none'); 
 
-      // Garante a troca de aba para a tela de lançamentos se estiver em outra
       var tabBtn = document.getElementById('lancamentos-tab');
       if (tabBtn) {
         var tabBS = bootstrap.Tab.getOrCreateInstance(tabBtn);
