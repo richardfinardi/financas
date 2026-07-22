@@ -56,7 +56,7 @@
 
   <nav class="navbar navbar-dark p-2">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V5.1</span>
+      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V5.2</span>
       <span class="badge bg-success" style="font-size: 11px;" id="status-conexao">🟢 Conectado</span>
     </div>
   </nav>
@@ -510,7 +510,7 @@
           },
           obterDadosIniciais: function() { this.executarGenerico('obterDadosIniciais'); },
           atualizarDatasLoteBackend: function(vetor) { this.executarGenerico('atualizarDatasLoteBackend', { argsArray: [vetor] }); },
-          excluirLinha: function(nomeAba, id) { this.executarGenerico('excluirLinha', {aba: nomeAba, id: id}); },
+          excluirLinha: function(nomeAba, id) { this.executarGenerico('excluirLinha', { argsArray: [nomeAba, Number(id)] }); },
           excluirLancamentoAvancado: function(id, tipo, recId, data) { this.executarGenerico('excluirLancamentoAvancado', {argsArray: [id, tipo, recId, data]}); },
           atualizarClienteBackend: function(dados) { this.executarGenerico('atualizarClienteBackend', dados); },
           salvarRegra: function(dados) { this.executarGenerico('salvarRegra', dados); },
@@ -520,7 +520,7 @@
             this.executarGenerico('atualizarLancamentoAvancado', { argsArray: [dados, tipo] }); 
           },
           
-          atualizarLancamentoBackend: function(dados) { this.executarGenerico('atualizarLancamentoBackend', dados); },
+          atualizarLancamentoBackend: function(dados) { this.executarGenerico('atualizarLancamentoBackend', { argsArray: [dados] }); },
           salvarLancamentoManual: function(dados) { this.executarGenerico('salvarLancamentoManual', dados); },
           salvarContasRecorrentesMaster: function(dados) { this.executarGenerico('salvarContasRecorrentesMaster', dados); },
           salvarCategoria: function(dados) { this.executarGenerico('salvarCategoria', dados); },
@@ -856,21 +856,21 @@
       });
     }
 
-    function solicitarExclusaoLancamento(linhaId, recorrenciaId, dataCorte) {
+function solicitarExclusaoLancamento(linhaId, recorrenciaId, dataCorte) {
       if (!recorrenciaId || recorrenciaId === "undefined" || recorrenciaId === "null" || String(recorrenciaId).trim() === "") { 
         exibirModalConfirmacao("Deseja excluir este lançamento manual?", function() {
           google.script.run.withSuccessHandler(function(){ 
-            exibirAvisoNaTela("Lançamento removido!", "success");
+            exibirAvisoNaTela("Lançamento removido com sucesso!", "success");
             recarregarDadosGlobais(); 
-          }).excluirLinha('Lancamentos', linhaId);
+          }).executarGenerico('excluirLinha', { argsArray: ['Lancamentos', Number(linhaId)] });
         });
         return; 
       }
       var escolha = prompt("Esta conta faz parte de uma RECORRÊNCIA.\nDigite a opção desejada:\n\n1 - Excluir APENAS esta parcela\n2 - Excluir ESTA e as parcelas FUTURAS");
       if (escolha === "1") {
-        google.script.run.withSuccessHandler(function(){ exibirAvisoNaTela("Parcela única excluída!", "success"); recarregarDadosGlobais(); }).excluirLancamentoAvancado(linhaId, "unico", "", "");
+        google.script.run.withSuccessHandler(function(){ exibirAvisoNaTela("Parcela única excluída!", "success"); recarregarDadosGlobais(); }).executarGenerico('excluirLancamentoAvancado', { argsArray: [linhaId, "unico", "", ""] });
       } else if (escolha === "2") {
-        google.script.run.withSuccessHandler(function(){ exibirAvisoNaTela("Série futura cancelada!", "success"); recarregarDadosGlobais(); }).excluirLancamentoAvancado(linhaId, "posteriores", recorrenciaId, dataCorte);
+        google.script.run.withSuccessHandler(function(){ exibirAvisoNaTela("Série futura cancelada!", "success"); recarregarDadosGlobais(); }).executarGenerico('excluirLancamentoAvancado', { argsArray: [linhaId, "posteriores", recorrenciaId, dataCorte] });
       }
     }
 
