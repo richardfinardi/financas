@@ -56,7 +56,7 @@
 
   <nav class="navbar navbar-dark p-2">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V5.2</span>
+      <span class="navbar-brand mb-0 h6">FLUXO DE CAIXA V5.3</span>
       <span class="badge bg-success" style="font-size: 11px;" id="status-conexao">🟢 Conectado</span>
     </div>
   </nav>
@@ -178,10 +178,10 @@
       <div class="tab-pane fade" id="faturar" role="tabpanel">
         <div class="card p-3">
           <div class="row align-items-center mb-2">
-            <div class="col-sm-6">
+            <div class="col-sm-5">
               <h6 class="fw-bold mb-0">Visitas Prontas para Cobrança</h6>
             </div>
-            <div class="col-sm-6 mt-2 mt-sm-0">
+            <div class="col-sm-4 mt-2 mt-sm-0">
               <input 
                 type="text" 
                 id="filtroClienteFaturar" 
@@ -189,6 +189,11 @@
                 placeholder="🔍 Pesquisar cliente..." 
                 oninput="filtrarClientesFaturar()"
               >
+            </div>
+            <div class="col-sm-3 text-end mt-2 mt-sm-0">
+              <button type="button" class="btn btn-sm btn-outline-primary fw-bold w-100" onclick="dispararAlertasDoSite()">
+                📧 Disparar Alertas (15 dias)
+              </button>
             </div>
           </div>
           <div class="table-responsive"><table class="table table-striped table-hover align-middle"><thead class="table-dark"><tr><th>Vencimento</th><th>Cliente / Detalhes</th><th>Valor</th><th width="150" class="text-center">Ação</th></tr></thead><tbody id="tbodyFilaFaturamento"></tbody></table></div>
@@ -514,12 +519,9 @@
           excluirLancamentoAvancado: function(id, tipo, recId, data) { this.executarGenerico('excluirLancamentoAvancado', {argsArray: [id, tipo, recId, data]}); },
           atualizarClienteBackend: function(dados) { this.executarGenerico('atualizarClienteBackend', dados); },
           salvarRegra: function(dados) { this.executarGenerico('salvarRegra', dados); },
-          
-          // 🚀 ENVIAR OS DOIS PARÂMETROS EXATOS EM ARRAY PARA A FUNÇÃO BACKEND DO GOOGLE APPS SCRIPT
           atualizarLancamentoAvancado: function(dados, tipo) { 
             this.executarGenerico('atualizarLancamentoAvancado', { argsArray: [dados, tipo] }); 
           },
-          
           atualizarLancamentoBackend: function(dados) { this.executarGenerico('atualizarLancamentoBackend', { argsArray: [dados] }); },
           salvarLancamentoManual: function(dados) { this.executarGenerico('salvarLancamentoManual', dados); },
           salvarContasRecorrentesMaster: function(dados) { this.executarGenerico('salvarContasRecorrentesMaster', dados); },
@@ -604,6 +606,17 @@
           renderizarDashboardMensal();
         })
         .obterDadosIniciais();
+    }
+
+    function dispararAlertasDoSite() {
+      exibirModalConfirmacao("Deseja verificar os títulos a vencer nos próximos 15 dias e enviar o relatório por e-mail para o financeiro?", function() {
+        exibirAvisoNaTela("Processando e enviando e-mails...", "success");
+        google.script.run
+          .withSuccessHandler(function(resposta) {
+            exibirAvisoNaTela(resposta || "Alertas processados!", "success");
+          })
+          .executarGenerico('enviarAlertasFaturamentoSite');
+      });
     }
 
     function executarSimulacaoEmTela() {
@@ -856,7 +869,7 @@
       });
     }
 
-function solicitarExclusaoLancamento(linhaId, recorrenciaId, dataCorte) {
+    function solicitarExclusaoLancamento(linhaId, recorrenciaId, dataCorte) {
       if (!recorrenciaId || recorrenciaId === "undefined" || recorrenciaId === "null" || String(recorrenciaId).trim() === "") { 
         exibirModalConfirmacao("Deseja excluir este lançamento manual?", function() {
           google.script.run.withSuccessHandler(function(){ 
